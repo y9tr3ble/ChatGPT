@@ -2,7 +2,7 @@
 ChatGPT is a Telegram bot that utilizes OpenAI's GPT-3.5-Turbo language model to generate human-like responses to user messages. The bot can be used for casual conversations, brainstorming ideas, or even for educational purposes.
 
 # Bot
-<h3 align="left">Telegram:</h3> <a href="https://t.me/Tr3ble"><img src="https://img.shields.io/website?color=9400d3&down_message=Tr3ble_AI&label=Telegram&logo=telegram&style=for-the-badge&up_message=ChatGPTtesting_robot&url=https%3A%2F%2Ft.me%2https://t.me/ChatGPTtesting_robot"></a>
+<h3 align="left">Telegram:</h3> <a href="https://t.me/ChatGPTtesting_robot"><img src="https://img.shields.io/website?color=9400d3&down_message=Tr3ble_AI&label=Telegram&logo=telegram&style=for-the-badge&up_message=ChatGPTtesting_robot&url=https%3A%2F%2Ft.me%2https://t.me/ChatGPTtesting_robot"></a>
 
 # Installation
 To use the ChatGPT bot, you will need to have a Telegram account and an OpenAI API key. You can obtain an API key by signing up for OpenAI's GPT-3 program.

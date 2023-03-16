@@ -31,7 +31,7 @@ async def new_topic_cmd(message: types.Message):
     try:
         username = message.from_user.username
         messages[username] = []
-        await message.answer("Начинаем новую тему!")
+        await message.reply('Starting a new topic! * * * \n\nНачинаем новую тему! * * *', parse_mode='Markdown')
     except Exception as e:
         logging.error(f'Error in new_topic_cmd: {e}')
 
@@ -52,7 +52,10 @@ async def echo_msg(message: types.Message):
         should_respond = not message.reply_to_message or message.reply_to_message.from_user.id == bot.id
 
         if should_respond:
-            processing_message = await message.reply("Пожалуйста, подождите, я обрабатываю ваш запрос...")
+            processing_message = await message.reply(
+                'Your request is being processed, please wait * * * \n\nВаш запрос обрабатывается, пожалуйста подождите * * *',
+                parse_mode='Markdown')
+            await bot.send_chat_action(chat_id=message.chat.id, action="typing")
             completion = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
                 messages=messages[username],
@@ -67,8 +70,13 @@ async def echo_msg(message: types.Message):
             logging.info(f'ChatGPT response: {chatgpt_response["content"]}')
             await message.reply(chatgpt_response['content'])
             await bot.delete_message(chat_id=processing_message.chat.id, message_id=processing_message.message_id)
-    except Exception as e:
-        logging.error(f'Error in echo_msg: {e}')
+    except Exception as ex:
+        if ex == 'context_length_exceeded':
+            await message.reply(
+                'The bot ran out of memory, re-creating the dialogue * * * \n\nУ бота закончилась память, пересоздаю диалог * * *',
+                parse_mode='Markdown')
+            await new_topic_cmd(message)
+            await echo_msg(message)
 
 
 if __name__ == '__main__':

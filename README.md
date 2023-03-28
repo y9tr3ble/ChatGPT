@@ -1,3 +1,6 @@
+> **Note**
+> GPT-4 support will be added as soon as APIs are released to the public!
+
 # ChatGPT: Telegram Bot powered by OpenAI GPT-3.5-Turbo
 ChatGPT is a Telegram bot that utilizes OpenAI's GPT-3.5-Turbo language model to generate human-like responses to user messages. The bot can be used for casual conversations, brainstorming ideas, or even for educational purposes.
 

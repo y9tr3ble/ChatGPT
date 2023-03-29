@@ -68,7 +68,7 @@ async def echo_msg(message: types.Message):
 
             # Generate a response using OpenAI's Chat API
             completion = await openai.ChatCompletion.acreate(
-                model="gpt-3.5-turbo",
+                model="gpt-4",
                 messages=messages[userid],
                 max_tokens=2500,
                 temperature=0.7,

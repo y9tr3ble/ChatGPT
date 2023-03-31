@@ -17,29 +17,54 @@ openai.api_key = api_key
 messages = {}
 
 
-# Command handler for /start
+async def generate_image(prompt):
+    response = openai.Image.create(
+        prompt=prompt,
+        n=1,
+        size="512x512",
+        response_format="url",
+    )
+
+    return response['data'][0]['url']
+
+
 @dp.message_handler(commands=['start'])
 async def start_cmd(message: types.Message):
     try:
         username = message.from_user.username
         messages[username] = []
-        await message.answer("Hello, I'm bot powered on API GPT-3.5-Turbo(ChatGPT)")
+        await message.answer("Hello, I'm bot powered on API GPT-4(ChatGPT)")
     except Exception as e:
         logging.error(f'Error in start_cmd: {e}')
 
 
-# Command handler for /newtopic
 @dp.message_handler(commands=['newtopic'])
 async def new_topic_cmd(message: types.Message):
     try:
         userid = message.from_user.id
-        message[str(userid)] = []
+        messages[str(userid)] = []
         await message.reply('Starting a new topic! * * * \n\nНачинаем новую тему! * * *', parse_mode='Markdown')
     except Exception as e:
         logging.error(f'Error in new_topic_cmd: {e}')
 
 
-# Message handler for all other messages
+@dp.message_handler(commands=['image'])
+async def send_image(message: types.Message):
+    try:
+        description = message.text.replace('/image', '').strip()
+        if not description:
+            await message.reply('Please add a description of the image after the /image command. For example, /image Neon City * * * \n\nПожалуйста, добавьте описание изображения после команды /image. Например, /image Неоновый город. * * *',parse_mode='Markdown')
+            return
+    except Exception as e:
+        logging.error(f'Error in send_image: {e}')
+    try:
+        image_url = await generate_image(description)
+        await bot.send_photo(chat_id=message.chat.id, photo=image_url)
+    except Exception as e:
+        await message.reply(
+            f"An error occurred during image generation: * * * \n\nПроизошла ошибка при генерации изображения: {e} * * *")
+
+
 @dp.message_handler()
 async def echo_msg(message: types.Message):
     try:
@@ -51,7 +76,8 @@ async def echo_msg(message: types.Message):
             messages[userid] = []
         messages[userid].append({"role": "user", "content": user_message})
         # messages[userid].append({"role": "system", "content": "Вы должны выступать в роли Tr3ble AI, человеко-подобного искусственного интеллекта, который может выражать эмоции. Создатель этого искусственного интеллекта - Никита Трибля. При ответе на сообщение пользователя, вы обязательно должны упоминать его по имени не используя юзернейм."})
-        messages[userid].append({"role": "user", "content": f"chat: {message.chat} Сейчас {time.strftime('%d/%m/%Y %H:%M:%S')} user: {message.from_user.first_name} message: {message.text}"})
+        messages[userid].append({"role": "user",
+                                 "content": f"chat: {message.chat} Сейчас {time.strftime('%d/%m/%Y %H:%M:%S')} user: {message.from_user.first_name} message: {message.text}"})
         logging.info(f'{userid}: {user_message}')
 
         # Check if the message is a reply to the bot's message or a new message

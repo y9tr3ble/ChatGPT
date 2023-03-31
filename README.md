@@ -35,8 +35,11 @@ The bot currently supports the following commands:
 
 /newtopic: Starts a new topic of conversation in the current conversation thread.
 
+/image: Generate image with support DALL-E
+
 # Interface 
-![image](https://user-images.githubusercontent.com/69369034/225102009-ede09ac4-1c1e-4ac5-9cef-e3da6bfcf2d9.png)
+![image](https://user-images.githubusercontent.com/69369034/225102009-ede09ac4-1c1e-4ac5-9cef-e3da6bfcf2d9.png)![image](https://user-images.githubusercontent.com/69369034/229245783-e8c48a79-a294-4f62-af28-69474842a270.png)
+
 
 # Contributing
 If you would like to contribute to the ChatGPT project, please submit a pull request with your proposed changes. We welcome contributions of all kinds, including bug fixes, new features, and improvements to the documentation.

@@ -5,7 +5,7 @@
 ChatGPT is a Telegram bot that utilizes OpenAI's GPT-4 language model to generate human-like responses to user messages. The bot can be used for casual conversations, brainstorming ideas, or even for educational purposes.
 
 # Bot
-The bot online (GPT3.5)
+The bot offline
 <h3 align="left">Telegram:</h3> <a href="https://t.me/ChatGPTtesting_robot"><img src="https://img.shields.io/website?color=9400d3&down_message=Tr3ble_AI&label=Telegram&logo=telegram&style=for-the-badge&up_message=ChatGPTtesting_robot&url=https%3A%2F%2Ft.me%2https://t.me/ChatGPTtesting_robot"></a>
 
 # Installation

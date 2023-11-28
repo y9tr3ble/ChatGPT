@@ -1,5 +1,5 @@
 > **Note**
-> Added API-GPT-4 support. You must register with the waitlist before using it - https://openai.com/waitlist/gpt-4-api. To use the bot without using gpt-4, change gpt-4 in the file to gpt-3.5-turbo
+> Added API-GPT-4 support. To use the bot without using gpt-4, change gpt-4 in the file to gpt-3.5-turbo
 
 # ChatGPT: Telegram Bot powered by OpenAI GPT-4
 ChatGPT is a Telegram bot that utilizes OpenAI's GPT-4 language model to generate human-like responses to user messages. The bot can be used for casual conversations, brainstorming ideas, or even for educational purposes.

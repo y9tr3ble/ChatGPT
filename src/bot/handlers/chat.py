@@ -4,6 +4,7 @@ from src.services.message_service import MessageService
 from src.services.openai_service import OpenAIService
 from src.services.gemini_service import GeminiService
 from src.services.user_service import UserService
+from src.bot.keyboards import get_main_keyboard
 import logging
 from typing import Any
 
@@ -21,8 +22,11 @@ async def handle_message(
     try:
         user_id = str(message.from_user.id)
         
-        # Skip if message is empty
-        if not message.text:
+        # Load user state from storage
+        message_service.load_user_state(user_id)
+        
+        # Игнорируем команды кнопок
+        if message.text.startswith(('❓', '🔄', '🌐', 'ℹ️')):
             return
         
         # Add message to history
@@ -41,20 +45,36 @@ async def handle_message(
             current_model = user_service.get_user_model(user_id)
             service = gemini_service if current_model == "gemini" else openai_service
             
-            # Generate response
-            response = await service.generate_chat_response(messages, user_id)
-            
-            # Add response to history
-            message_service.add_message(user_id, "assistant", response)
-            
-            # Send response
-            await message.answer(response)
+            try:
+                # Generate response
+                response = await service.generate_chat_response(messages, user_id)
+                
+                # Add response to history
+                message_service.add_message(user_id, "assistant", response)
+                
+                # Send response with keyboard
+                lang = message_service.get_user_language(message.from_user.id)
+                keyboard = get_main_keyboard(lang)
+                await message.answer(response, reply_markup=keyboard)
+                
+            except ValueError as ve:
+                if str(ve) == "safety_error":
+                    # Отправляем сообщение о нарушении правил безопасности
+                    await message_service.send_message(
+                        message.from_user.id,
+                        "safety_error",
+                        message,
+                        reply_markup=get_main_keyboard(message_service.get_user_language(message.from_user.id))
+                    )
+                else:
+                    raise
             
         except Exception as e:
-            logging.error(f"{current_model.upper()} API error: {str(e)}")
-            await message.answer(
-                message_service.get_message("error", message_service.get_user_language(message.from_user.id))
-            )
+            if not isinstance(e, ValueError) or str(e) != "safety_error":
+                logging.error(f"{current_model.upper()} API error: {str(e)}")
+                await message.answer(
+                    message_service.get_message("error", message_service.get_user_language(message.from_user.id))
+                )
         finally:
             try:
                 await processing_msg.delete()

@@ -22,5 +22,10 @@ class GeminiService:
             return response.text
             
         except Exception as e:
-            logging.error(f"Gemini API error for user {user_id}: {str(e)}")
-            raise Exception(f"Gemini API error: {str(e)}") 
+            error_str = str(e)
+            if "SAFETY" in error_str or "safety_ratings" in error_str:
+                logging.warning(f"Gemini safety error for user {user_id}: {error_str}")
+                raise ValueError("safety_error")
+            else:
+                logging.error(f"Gemini API error for user {user_id}: {error_str}")
+                raise Exception(f"Gemini API error: {error_str}") 

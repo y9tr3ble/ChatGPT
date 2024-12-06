@@ -20,6 +20,7 @@ from src.services.openai_service import OpenAIService
 from src.services.gemini_service import GeminiService
 from src.services.user_service import UserService
 from src.bot.middlewares.language import LanguageMiddleware
+from src.services.storage_service import StorageService
 
 async def main():
     # Настраиваем логирование
@@ -39,11 +40,16 @@ async def main():
         bot_info = await bot.get_me()
         logging.info(f"Bot connection successful! Bot name: {bot_info.full_name}")
         
-        # Initialize services
-        message_service = MessageService()
+        # Initialize storage and services
+        storage_service = StorageService()
+        message_service = MessageService(storage_service)
         openai_service = OpenAIService(config.openai_api_key)
         gemini_service = GeminiService(config.gemini_api_key)
-        user_service = UserService()
+        user_service = UserService(storage_service)
+        
+        # Clear all messages at startup
+        message_service.clear_all_messages()
+        logging.info("All message histories cleared")
         
         # Initialize dispatcher
         dp = Dispatcher(storage=MemoryStorage())

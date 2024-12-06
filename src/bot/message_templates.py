@@ -2,27 +2,47 @@ from typing import Dict, Any
 
 message_templates: Dict[str, Dict[str, str]] = {
     'en': {
-        'start': "Hello, I'm bot powered on API GPT-4(ChatGPT). Enter /help",
-        'new_topic': 'Starting a new topic!',
-        'image_prompt': 'Please add a description of the image after the /image command.',
-        'image_error': 'An error occurred during image generation:',
-        'about': 'This bot is powered by OpenAI GPT-4.',
-        'help': '''Available commands:
+        'start': """ Hello! I'm a smart assistant powered by AI.
+
+I can help you with various tasks using two powerful AI models:
+• OpenAI GPT-4 🤖
+• Google Gemini ✨
+
+Use the buttons below to interact with me!""",
+        'help': """🔍 <b>Available Commands:</b>
+
 /start - Start bot
 /help - Show this help
 /about - About bot
 /language - Change language
 /model - Show current AI model
-/use_openai - Switch to OpenAI
-/use_gemini - Switch to Gemini
-''',
+
+You can also use the buttons below for quick access to commands.""",
+        'about': """🤖 <b>AI Assistant Bot</b>
+
+This bot combines the power of two leading AI models:
+• OpenAI GPT-4
+• Google Gemini
+
+Version: 1.0
+Developer: @your_username""",
+        'new_topic': 'Starting a new topic!',
+        'image_prompt': 'Please add a description of the image after the /image command.',
+        'image_error': 'An error occurred during image generation:',
         'language_confirmation': "Language has been set to English.",
         'language_selection': "Choose your language:",
         'processing': "Processing your request...",
         'error': "An error occurred. Please try again later.",
         'model_switched_gemini': "Switched to Gemini model ✨",
         'model_switched_openai': "Switched to OpenAI model 🤖",
-        'current_model': "Current model: {}",
+        'current_model': "Current model: {model}",
+        'safety_error': """⚠️ I cannot process this request due to content safety guidelines.
+Please rephrase your message to be more appropriate and try again.
+
+Guidelines:
+• Avoid sensitive topics
+• Keep the conversation respectful
+• No explicit content""",
     },
     'ru': {
         'start': "Привет, я бот на основе API GPT-4(ChatGPT). Введите /help",
@@ -45,7 +65,14 @@ message_templates: Dict[str, Dict[str, str]] = {
         'error': "Произошла ошибка. Пожалуйста, попробуйте позже.",
         'model_switched_gemini': "Переключено на модель Gemini ✨",
         'model_switched_openai': "Переключено на модель OpenAI 🤖",
-        'current_model': "Текущая модель: {}",
+        'current_model': "Текущая модель: {model}",
+        'safety_error': """⚠️ Я не могу обработать этот запрос из-за правил безопасности контента.
+Пожалуйста, перефразируйте сообщение более корректно и попробуйте снова.
+
+Рекомендации:
+• Избегайте чувствительных тем
+• Соблюдайте уважительный тон
+• Без неприемлемого контента""",
     },
     'ua': {
         'start': "Привіт, я бот на основі API GPT-4(ChatGPT). Введіть /help",
@@ -68,7 +95,14 @@ message_templates: Dict[str, Dict[str, str]] = {
         'error': "Сталася помилка. Будь ласка, спробуйте пізніше.",
         'model_switched_gemini': "Переключено на модель Gemini ✨",
         'model_switched_openai': "Переключено на модель OpenAI 🤖",
-        'current_model': "Поточна модель: {}",
+        'current_model': "Поточна модель: {model}",
+        'safety_error': """⚠️ Я не можу обробити цей запит через правила безпеки контенту.
+Будь ласка, перефразуйте повідомлення більш коректно та спробуйте знову.
+
+Рекомендації:
+• Уникайте чутливих тем
+• Дотримуйтесь шанобливого тону
+• Без неприйнятного контенту""",
     }
 }
 

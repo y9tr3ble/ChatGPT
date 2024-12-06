@@ -34,7 +34,9 @@ Developer: @your_username""",
         'processing': "Processing your request...",
         'error': "An error occurred. Please try again later.",
         'model_switched_gemini': "Switched to Gemini model ✨",
-        'model_switched_openai': "Switched to OpenAI model 🤖",
+        'model_switched_gpt4': "Switched to GPT-4 model 🤖",
+        'model_switched_gpt4o': "Switched to GPT-4O model 🔮",
+        'model_switched_gpt4o_mini': "Switched to GPT-4O-mini model 🎯",
         'current_model': "Current model: {model}",
         'safety_error': """⚠️ I cannot process this request due to content safety guidelines.
 Please rephrase your message to be more appropriate and try again.
@@ -64,7 +66,9 @@ Guidelines:
         'processing': "Обрабатываю ваш запрос...",
         'error': "Произошла ошибка. Пожалуйста, попробуйте позже.",
         'model_switched_gemini': "Переключено на модель Gemini ✨",
-        'model_switched_openai': "Переключено на модель OpenAI 🤖",
+        'model_switched_gpt4': "Переключено на модель GPT-4 🤖",
+        'model_switched_gpt4o': "Переключено на модель GPT-4O 🔮",
+        'model_switched_gpt4o_mini': "Переключено на модель GPT-4O-mini 🎯",
         'current_model': "Текущая модель: {model}",
         'safety_error': """⚠️ Я не могу обработать этот запрос из-за правил безопасности контента.
 Пожалуйста, перефразируйте сообщение более корректно и попробуйте снова.
@@ -94,7 +98,9 @@ Guidelines:
         'processing': "Обробляю ваш запит...",
         'error': "Сталася помилка. Будь ласка, спробуйте пізніше.",
         'model_switched_gemini': "Переключено на модель Gemini ✨",
-        'model_switched_openai': "Переключено на модель OpenAI 🤖",
+        'model_switched_gpt4': "Переключено на модель GPT-4 🤖",
+        'model_switched_gpt4o': "Переключено на модель GPT-4O 🔮",
+        'model_switched_gpt4o_mini': "Переключено на модель GPT-4O-mini 🎯",
         'current_model': "Поточна модель: {model}",
         'safety_error': """⚠️ Я не можу обробити цей запит через правила безпеки контенту.
 Будь ласка, перефразуйте повідомлення більш коректно та спробуйте знову.

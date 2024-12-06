@@ -18,6 +18,7 @@ from src.bot.handlers import common, language, chat
 from src.services.message_service import MessageService
 from src.services.openai_service import OpenAIService
 from src.services.gemini_service import GeminiService
+from src.services.gpt4o_service import GPT4OService
 from src.services.user_service import UserService
 from src.bot.middlewares.language import LanguageMiddleware
 from src.services.storage_service import StorageService
@@ -45,6 +46,7 @@ async def main():
         message_service = MessageService(storage_service)
         openai_service = OpenAIService(config.openai_api_key)
         gemini_service = GeminiService(config.gemini_api_key)
+        gpt4o_service = GPT4OService(config.openai_api_key)
         user_service = UserService(storage_service)
         
         # Clear all messages at startup
@@ -66,6 +68,7 @@ async def main():
         dp["message_service"] = message_service
         dp["openai_service"] = openai_service
         dp["gemini_service"] = gemini_service
+        dp["gpt4o_service"] = gpt4o_service
         dp["user_service"] = user_service
         
         # Start polling

@@ -15,8 +15,12 @@ def get_model_keyboard() -> InlineKeyboardMarkup:
     """Клавиатура выбора модели"""
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [
-            InlineKeyboardButton(text="OpenAI GPT-4 🤖", callback_data="model_openai"),
+            InlineKeyboardButton(text="GPT-4 🤖", callback_data="model_gpt4"),
             InlineKeyboardButton(text="Google Gemini ✨", callback_data="model_gemini")
+        ],
+        [
+            InlineKeyboardButton(text="GPT-4O 🔮", callback_data="model_gpt4o"),
+            InlineKeyboardButton(text="GPT-4O-mini 🎯", callback_data="model_gpt4o_mini")
         ]
     ])
     return keyboard

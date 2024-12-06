@@ -15,19 +15,19 @@ class UserService:
     def save_user_state(self, user_id: str) -> None:
         """Save user state to storage"""
         data = {
-            'model': self.user_models.get(user_id, 'openai')
+            'model': self.user_models.get(user_id, 'gpt4')
         }
         self.storage.save_user_data(user_id, data)
         
     def get_user_model(self, user_id: str) -> str:
-        """Get user's current model (default to OpenAI)"""
+        """Get user's current model (default to GPT-4)"""
         if user_id not in self.user_models:
             self.load_user_state(user_id)
-        return self.user_models.get(user_id, "openai")
+        return self.user_models.get(user_id, "gpt4")
     
     def set_user_model(self, user_id: str, model: str) -> None:
         """Set user's preferred model and save state"""
-        if model not in ["openai", "gemini"]:
+        if model not in ["gpt4", "gemini", "gpt4o", "gpt4o_mini"]:
             raise ValueError(f"Unsupported model: {model}")
         self.user_models[user_id] = model
         self.save_user_state(user_id)

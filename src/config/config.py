@@ -11,34 +11,28 @@ class Config:
     gemini_api_key: str
 
     def __init__(self):
-        # Очищаем существующие переменные окружения
-        if "BOT_TOKEN" in environ:
-            del environ["BOT_TOKEN"]
-        if "OPENAI_API_KEY" in environ:
-            del environ["OPENAI_API_KEY"]
-        if "GEMINI_API_KEY" in environ:
-            del environ["GEMINI_API_KEY"]
-            
-        # Определяем путь к корневой директории проекта
-        project_root = path.dirname(path.dirname(path.dirname(path.abspath(__file__))))
-        env_path = path.join(project_root, '.env')
-        
-        # Проверяем наличие файла .env
-        if not path.exists(env_path):
-            raise FileNotFoundError(f".env file not found at {env_path}")
-        
-        # Загружаем переменные окружения
-        load_dotenv(env_path, override=True)
-        
-        # Читаем файл напрямую для отладки
-        with open(env_path, 'r') as f:
-            env_content = f.read()
-            logging.info(f"Raw .env content:\n{env_content}")
-        
-        # Получаем значения
-        self.bot_token = getenv("BOT_TOKEN")
-        self.openai_api_key = getenv("OPENAI_API_KEY")
-        self.gemini_api_key = getenv("GEMINI_API_KEY")
+        # Load environment variables from .env file
+        env_path = path.join(path.dirname(path.dirname(path.dirname(__file__))), '.env')
+        if path.exists(env_path):
+            load_dotenv(env_path)
+        else:
+            logging.warning("No .env file found")
+
+        # Get required environment variables
+        self.bot_token = environ.get('BOT_TOKEN')
+        self.openai_api_key = environ.get('OPENAI_API_KEY')
+        self.gemini_api_key = environ.get('GEMINI_API_KEY')
+
+        # Check if required variables are set
+        if not all([self.bot_token, self.openai_api_key, self.gemini_api_key]):
+            missing = []
+            if not self.bot_token:
+                missing.append('BOT_TOKEN')
+            if not self.openai_api_key:
+                missing.append('OPENAI_API_KEY')
+            if not self.gemini_api_key:
+                missing.append('GEMINI_API_KEY')
+            raise ValueError(f"Missing required environment variables: {', '.join(missing)}")
         
         # Отладочная информация
         logging.info(f"Project root: {project_root}")

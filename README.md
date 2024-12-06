@@ -161,8 +161,8 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 If you have any questions or need help, feel free to:
 - Open an issue
-- Contact @your_username on Telegram
-- Send an email to your@email.com
+- Contact @tr3ble on Telegram
+- Send an email to tr3ble@outlook.com
 
 ## Acknowledgments 🙏
 

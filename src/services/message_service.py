@@ -5,6 +5,9 @@ from src.bot.message_templates import message_templates
 from src.services.storage_service import StorageService
 import os
 import logging
+import asyncio
+from collections import deque
+import html
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +19,172 @@ class MessageService:
         self.storage = storage
         self.max_messages = max_messages
         self.max_tokens = max_tokens
+        self.message_queue: Dict[int, deque] = {}
+        self.MAX_MESSAGE_LENGTH = 4096  # Telegram's max message length
         
+    def _escape_html(self, text: str) -> str:
+        """Escape HTML special characters"""
+        return html.escape(text)
+        
+    def _format_code_block(self, code: str, language: str = "") -> str:
+        """Format code block with proper HTML tags and syntax highlighting hint"""
+        escaped_code = self._escape_html(code)
+        if language:
+            return f'<pre><code class="{language}">{escaped_code}</code></pre>'
+        return f'<pre><code>{escaped_code}</code></pre>'
+        
+    def _format_inline_code(self, code: str) -> str:
+        """Format inline code with proper HTML tags"""
+        escaped_code = self._escape_html(code)
+        return f'<code>{escaped_code}</code>'
+        
+    def _split_long_message(self, text: str) -> List[str]:
+        """Split long messages into chunks respecting code blocks and markdown"""
+        if len(text) <= self.MAX_MESSAGE_LENGTH:
+            return [text]
+            
+        chunks = []
+        current_chunk = ""
+        in_code_block = False
+        
+        lines = text.split('\n')
+        
+        for line in lines:
+            # Check if this line would exceed the limit
+            if len(current_chunk) + len(line) + 1 > self.MAX_MESSAGE_LENGTH:
+                if in_code_block:
+                    current_chunk += '</code></pre>'
+                chunks.append(current_chunk)
+                current_chunk = ""
+                if in_code_block:
+                    current_chunk += '<pre><code>'
+                    
+            if line.strip().startswith('```'):
+                in_code_block = not in_code_block
+                if in_code_block:
+                    current_chunk += '<pre><code>'
+                else:
+                    current_chunk += '</code></pre>'
+            else:
+                current_chunk += line + '\n'
+                
+        if current_chunk:
+            if in_code_block:
+                current_chunk += '</code></pre>'
+            chunks.append(current_chunk)
+            
+        return chunks
+        
+    async def _send_message_safe(self, 
+        message: types.Message,
+        text: str,
+        reply_markup: Optional[Union[InlineKeyboardMarkup, ReplyKeyboardMarkup]] = None,
+        retry_count: int = 3
+    ) -> bool:
+        """Send message with retries and error handling"""
+        for attempt in range(retry_count):
+            try:
+                await message.answer(
+                    text,
+                    reply_markup=reply_markup,
+                    parse_mode="HTML"
+                )
+                return True
+            except Exception as e:
+                if attempt == retry_count - 1:  # Last attempt
+                    logger.error(f"Failed to send message after {retry_count} attempts: {str(e)}")
+                    # Try without HTML formatting as last resort
+                    try:
+                        plain_text = text.replace('<pre><code>', '').replace('</code></pre>', '')
+                        plain_text = plain_text.replace('<code>', '').replace('</code>', '')
+                        await message.answer(plain_text, reply_markup=reply_markup)
+                        return True
+                    except Exception as e2:
+                        logger.error(f"Failed to send plain text message: {str(e2)}")
+                        return False
+                await asyncio.sleep(1)  # Wait before retry
+        return False
+
+    async def send_message(
+        self, 
+        user_id: int, 
+        message_key_or_text: str, 
+        message: types.Message, 
+        reply_markup: Union[InlineKeyboardMarkup, ReplyKeyboardMarkup, None] = None,
+        is_response: bool = False,
+        **kwargs
+    ) -> None:
+        """Send message to user using template with optional formatting and keyboard"""
+        # If it's a template key, get the template
+        if not is_response:
+            language = self.get_user_language(user_id)
+            text = self.get_message(message_key_or_text, language)
+            
+            # Format message if kwargs provided
+            if kwargs:
+                text = text.format(**kwargs)
+        else:
+            # If it's a direct response, use the text as is
+            text = message_key_or_text
+            
+        # Handle inline code blocks (between single backticks)
+        while '`' in text and text.count('`') >= 2:
+            start = text.find('`')
+            end = text.find('`', start + 1)
+            if start != -1 and end != -1:
+                code = text[start + 1:end]
+                text = text[:start] + self._format_inline_code(code) + text[end + 1:]
+            
+        # Handle code blocks for Telegram formatting
+        if "```" in text:
+            # Split text by code blocks
+            parts = text.split("```")
+            formatted_text = parts[0]  # First part (before any code block)
+            
+            for i in range(1, len(parts), 2):
+                if i < len(parts):
+                    # Extract code and language (if specified)
+                    code_part = parts[i].strip()
+                    if code_part and "\n" in code_part:
+                        first_line = code_part.split("\n")[0]
+                        if first_line.strip() in ["cpp", "c++", "python", "js", "javascript", "html", "css", "java", "rust", "go"]:
+                            code = "\n".join(code_part.split("\n")[1:])
+                            lang = first_line.strip()
+                        else:
+                            code = code_part
+                            lang = ""
+                    else:
+                        code = code_part
+                        lang = ""
+                    
+                    # Format code block
+                    formatted_text += "\n" + self._format_code_block(code, lang) + "\n"
+                    
+                    # Add text between code blocks
+                    if i + 1 < len(parts):
+                        formatted_text += parts[i + 1]
+            
+            text = formatted_text
+            
+        # Split long messages
+        message_parts = self._split_long_message(text)
+        
+        # Send each part
+        for part in message_parts:
+            success = await self._send_message_safe(message, part, reply_markup if part == message_parts[-1] else None)
+            if not success:
+                logger.error(f"Failed to send message part to user {user_id}")
+                # Send error message to user
+                await self._send_message_safe(
+                    message,
+                    self.get_message("error", self.get_user_language(user_id)),
+                    None
+                )
+                break
+            # Small delay between parts to prevent flooding
+            if len(message_parts) > 1:
+                await asyncio.sleep(0.5)
+
     def load_user_state(self, user_id: str) -> None:
         """Load user state from storage"""
         data = self.storage.load_user_data(user_id)
@@ -108,71 +276,6 @@ class MessageService:
             "max_messages": self.max_messages,
             "max_tokens": self.max_tokens
         }
-
-    async def send_message(
-        self, 
-        user_id: int, 
-        message_key_or_text: str, 
-        message: types.Message, 
-        reply_markup: Union[InlineKeyboardMarkup, ReplyKeyboardMarkup, None] = None,
-        is_response: bool = False,
-        **kwargs
-    ) -> None:
-        """Send message to user using template with optional formatting and keyboard"""
-        # If it's a template key, get the template
-        if not is_response:
-            language = self.get_user_language(user_id)
-            text = self.get_message(message_key_or_text, language)
-            
-            # Format message if kwargs provided
-            if kwargs:
-                text = text.format(**kwargs)
-        else:
-            # If it's a direct response, use the text as is
-            text = message_key_or_text
-            
-        # Handle code blocks for Telegram formatting
-        if "```" in text:
-            # Split text by code blocks
-            parts = text.split("```")
-            formatted_text = parts[0]  # First part (before any code block)
-            
-            for i in range(1, len(parts), 2):
-                if i < len(parts):
-                    # Extract code and language (if specified)
-                    code_part = parts[i].strip()
-                    if code_part and "\n" in code_part:
-                        first_line = code_part.split("\n")[0]
-                        if first_line.strip() in ["cpp", "c++", "python", "js", "javascript"]:
-                            code = "\n".join(code_part.split("\n")[1:])
-                            lang = first_line.strip()
-                        else:
-                            code = code_part
-                            lang = ""
-                    else:
-                        code = code_part
-                        lang = ""
-                    
-                    # Escape HTML special characters in code
-                    code = code.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-                    
-                    # Format code block with HTML and proper spacing
-                    formatted_text += f"\n<pre><code>{code}</code></pre>\n"
-                    
-                    # Add text between code blocks
-                    if i + 1 < len(parts):
-                        formatted_text += parts[i + 1]
-            
-            text = formatted_text
-        
-        # Send message
-        try:
-            await message.answer(text, reply_markup=reply_markup, parse_mode="HTML")
-        except Exception as e:
-            # If HTML parsing fails, try sending without code formatting
-            logging.error(f"Error sending formatted message: {str(e)}")
-            text = text.replace("<pre><code>", "").replace("</code></pre>", "")
-            await message.answer(text, reply_markup=reply_markup)
 
     def clear_all_messages(self) -> None:
         """Clear all messages for all users"""

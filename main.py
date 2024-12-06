@@ -1,162 +1,110 @@
+import asyncio
 import logging
-import time
-from aiogram import Bot, Dispatcher, executor, types
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-import openai
-from config import bot_token, api_key
-from message_templates import message_templates
+import sys
+from os import path
 
-logging.basicConfig(level=logging.INFO)
+# Add project root to sys.path
+project_root = path.dirname(path.abspath(__file__))
+if project_root not in sys.path:
+    sys.path.append(project_root)
 
-bot = Bot(token=bot_token)
-dp = Dispatcher(bot)
+from aiogram import Bot, Dispatcher
+from aiogram.enums import ParseMode
+from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram.client.session.aiohttp import AiohttpSession
+from aiogram.exceptions import TelegramAPIError
+from aiogram.client.default import DefaultBotProperties
 
-openai.api_key = api_key
+from src.config import Config
+from src.bot.handlers import common, language, chat
+from src.services.message_service import MessageService
+from src.services.openai_service import OpenAIService
+from src.services.gemini_service import GeminiService
+from src.services.gpt4o_service import GPT4OService
+from src.services.claude_service import ClaudeService
+from src.services.user_service import UserService
+from src.bot.middlewares.language import LanguageMiddleware
+from src.services.storage_service import StorageService
 
-messages = {}
-user_languages = {}  # Keep track of user's current language
+async def create_bot(token: str) -> Bot:
+    """Create and validate bot instance"""
+    session = AiohttpSession()
+    default = DefaultBotProperties(parse_mode=ParseMode.HTML)
+    bot = Bot(token=token, session=session, default=default)
+    
+    try:
+        # Test bot token by getting bot info
+        bot_info = await bot.get_me()
+        logging.info(f"Successfully initialized bot: {bot_info.full_name}")
+        return bot
+    except TelegramAPIError as e:
+        await session.close()
+        error_msg = f"Failed to initialize bot: {str(e)}"
+        logging.error(error_msg)
+        raise ValueError(error_msg)
 
-
-@dp.callback_query_handler(lambda c: c.data in ['en', 'ru', 'ua'])
-async def process_callback(callback_query: types.CallbackQuery):
-    user_languages[callback_query.from_user.id] = callback_query.data
-    await send_message(callback_query.from_user.id, 'language_confirmation')
-    await bot.answer_callback_query(callback_query.id)
-
-
-# Create language selection keyboard
-language_keyboard = InlineKeyboardMarkup(row_width=2)
-language_keyboard.add(InlineKeyboardButton("English🇬🇧", callback_data='en'),
-                      InlineKeyboardButton("Русский🇷🇺", callback_data='ru'),
-                      InlineKeyboardButton("Український🇺🇦", callback_data='ua'))
-
-
-async def send_message(user_id, message_key):
-    language = user_languages.get(user_id, 'en')  # Default to English
-    message_template = message_templates[language][message_key]
-    await bot.send_message(user_id, message_template)
-
-
-@dp.message_handler(commands=['language'])
-async def language_cmd(message: types.Message):
-    await bot.send_message(message.chat.id, message_templates['en']['language_selection'],
-                           reply_markup=language_keyboard)
-
-
-@dp.callback_query_handler(lambda c: c.data in ['en', 'ru'])
-async def process_callback(callback_query: types.CallbackQuery):
-    user_languages[callback_query.from_user.id] = callback_query.data
-    await bot.answer_callback_query(callback_query.id)
-
-
-async def generate_image(prompt):
-    response = openai.Image.create(
-        prompt=prompt,
-        n=1,
-        size="512x512",
-        response_format="url",
+async def main():
+    # Configure logging
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
     )
-
-    return response['data'][0]['url']
-
-
-@dp.message_handler(commands=['start'])
-async def start_cmd(message: types.Message):
+    
+    bot = None
     try:
-        username = message.from_user.username
-        messages[username] = []
-        language = user_languages.get(message.from_user.id, 'en')  # Get the selected language
-        await message.reply(message_templates[language]['start'])  # Retrieve the correct message based on the language
+        # Load config
+        config = Config()
+        
+        # Initialize bot
+        bot = await create_bot(config.bot_token)
+        
+        # Initialize services
+        storage_service = StorageService()
+        message_service = MessageService(storage_service)
+        openai_service = OpenAIService(config.openai_api_key)
+        gemini_service = GeminiService(config.gemini_api_key)
+        gpt4o_service = GPT4OService(config.openai_api_key)
+        claude_service = ClaudeService(config.anthropic_api_key)
+        user_service = UserService(storage_service)
+        
+        # Clear all messages at startup
+        message_service.clear_all_messages()
+        logging.info("All message histories cleared")
+        
+        # Initialize dispatcher
+        dp = Dispatcher(storage=MemoryStorage())
+        
+        # Register middlewares
+        dp.message.middleware(LanguageMiddleware(message_service))
+        
+        # Register routers
+        dp.include_router(language.router)
+        dp.include_router(common.router)
+        dp.include_router(chat.router)
+        
+        # Set up services for handlers
+        dp["message_service"] = message_service
+        dp["openai_service"] = openai_service
+        dp["gemini_service"] = gemini_service
+        dp["gpt4o_service"] = gpt4o_service
+        dp["claude_service"] = claude_service
+        dp["user_service"] = user_service
+        
+        # Start polling
+        logging.info("Starting bot...")
+        await dp.start_polling(bot)
+        
     except Exception as e:
-        logging.error(f'Error in start_cmd: {e}')
+        logging.error(f"Startup error: {str(e)}")
+        raise
+    finally:
+        if bot is not None:
+            await bot.session.close()
 
-
-@dp.message_handler(commands=['newtopic'])
-async def new_topic_cmd(message: types.Message):
+if __name__ == "__main__":
     try:
-        userid = message.from_user.id
-        messages[str(userid)] = []
-        language = user_languages.get(message.from_user.id, 'en')
-        await message.reply(message_templates[language]['newtopic'])
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        logging.info("Bot stopped!")
     except Exception as e:
-        logging.error(f'Error in new_topic_cmd: {e}')
-
-
-@dp.message_handler(commands=['image'])
-async def send_image(message: types.Message):
-    try:
-        description = message.text.replace('/image', '').strip()
-        language = user_languages.get(message.from_user.id, 'en')
-        if not description:
-            await message.reply(message_templates[language]['image_prompt'])
-            return
-    except Exception as e:
-        logging.error(f'Error in send_image: {e}')
-    try:
-        image_url = await generate_image(description)
-        await bot.send_photo(chat_id=message.chat.id, photo=image_url)
-    except Exception as e:
-        await message.reply(message_templates[language]['image_error'] + str(e))
-
-
-@dp.message_handler(commands=['help'])
-async def help_cmd(message: types.Message):
-    language = user_languages.get(message.from_user.id, 'en')
-    await message.reply(message_templates[language]['help'])
-
-
-@dp.message_handler(commands=['about'])
-async def about_cmd(message: types.Message):
-    language = user_languages.get(message.from_user.id, 'en')
-    await message.reply(message_templates[language]['about'])
-
-
-@dp.message_handler()
-async def echo_msg(message: types.Message):
-    try:
-        user_message = message.text
-        userid = message.from_user.username
-
-        if userid not in messages:
-            messages[userid] = []
-        messages[userid].append({"role": "user", "content": user_message})
-        messages[userid].append({"role": "user",
-                                 "content": f"chat: {message.chat} Now {time.strftime('%d/%m/%Y %H:%M:%S')} user: {message.from_user.first_name} message: {message.text}"})
-        logging.info(f'{userid}: {user_message}')
-
-        should_respond = not message.reply_to_message or message.reply_to_message.from_user.id == bot.id
-
-        if should_respond:
-            language = user_languages.get(message.from_user.id, 'en')
-            processing_message = await message.reply(message_templates[language]['processing'])
-
-            await bot.send_chat_action(chat_id=message.chat.id, action="typing")
-
-            completion = await openai.ChatCompletion.acreate(
-                model="gpt-4",
-                messages=messages[userid],
-                max_tokens=2500,
-                temperature=0.7,
-                frequency_penalty=0,
-                presence_penalty=0,
-                user=userid
-            )
-            chatgpt_response = completion.choices[0]['message']
-
-            messages[userid].append({"role": "assistant", "content": chatgpt_response['content']})
-            logging.info(f'ChatGPT response: {chatgpt_response["content"]}')
-
-            await message.reply(chatgpt_response['content'])
-
-            await bot.delete_message(chat_id=processing_message.chat.id, message_id=processing_message.message_id)
-
-    except Exception as ex:
-        if ex == "context_length_exceeded":
-            language = user_languages.get(message.from_user.id, 'en')
-            await message.reply(message_templates[language]['error'])
-            await new_topic_cmd(message)
-            await echo_msg(message)
-
-
-if __name__ == '__main__':
-    executor.start_polling(dp)
+        logging.error(f"Fatal error: {str(e)}")

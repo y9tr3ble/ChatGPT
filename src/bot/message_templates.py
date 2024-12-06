@@ -9,6 +9,8 @@ I can help you with various tasks using powerful AI models:
 • Gemini ✨ - Google's latest AI
 • GPT-4O 🔮 - Optimized GPT-4
 • GPT-4O-mini 🎯 - Faster version
+• Claude 3.5 Sonnet 🎭 - Anthropic's latest model
+• Claude 3.5 Haiku 🎋 - Fast and efficient
 
 Features:
 • Multi-language support 🌐
@@ -34,9 +36,11 @@ This bot combines multiple powerful AI models:
 • Google Gemini
 • GPT-4O
 • GPT-4O-mini
+• Claude 3.5 Sonnet
+• Claude 3.5 Haiku
 
 Version: 2.0
-Developer: @tr3ble""",
+Developer: @your_username""",
         'new_topic': '🆕 Starting a new topic!',
         'image_prompt': '🎨 Please describe the image you want to generate:',
         'image_error': '❌ An error occurred during image generation:',
@@ -48,6 +52,8 @@ Developer: @tr3ble""",
         'model_switched_gemini': "✨ Switched to Gemini model",
         'model_switched_gpt4o': "🔮 Switched to GPT-4O model",
         'model_switched_gpt4o_mini': "🎯 Switched to GPT-4O-mini model",
+        'model_switched_claude': "🎭 Switched to Claude 3.5 Sonnet model",
+        'model_switched_claude_haiku': "🎋 Switched to Claude 3.5 Haiku model",
         'current_model': "Current model: {model}",
         'safety_error': """⚠️ I cannot process this request due to content safety guidelines.
 Please rephrase your message to be more appropriate."""
@@ -60,6 +66,8 @@ Please rephrase your message to be more appropriate."""
 • Gemini ✨ - Новейший ИИ от Google
 • GPT-4O 🔮 - Оптимизированный GPT-4
 • GPT-4O-mini 🎯 - Быстрая версия
+• Claude 3.5 Sonnet 🎭 - Новейшая модель от Anthropic
+• Claude 3.5 Haiku 🎋 - Быстрая и эффективная
 
 Возможности:
 • Поддержка разных языков 🌐
@@ -85,9 +93,11 @@ Please rephrase your message to be more appropriate."""
 • Google Gemini
 • GPT-4O
 • GPT-4O-mini
+• Claude 3.5 Sonnet
+• Claude 3.5 Haiku
 
 Версия: 2.0
-Разработчик: @tr3ble""",
+Разработчик: @your_username""",
         'new_topic': '🆕 Начинаем новую тему!',
         'image_prompt': '🎨 Пожалуйста, опишите изображение, которое хотите создать:',
         'image_error': '❌ Произошла ошибка при создании изображения:',
@@ -99,6 +109,8 @@ Please rephrase your message to be more appropriate."""
         'model_switched_gemini': "✨ Переключено на модель Gemini",
         'model_switched_gpt4o': "🔮 Переключено на модель GPT-4O",
         'model_switched_gpt4o_mini': "🎯 Переключено на модель GPT-4O-mini",
+        'model_switched_claude': "🎭 Переключено на модель Claude 3.5 Sonnet",
+        'model_switched_claude_haiku': "🎋 Переключено на модель Claude 3.5 Haiku",
         'current_model': "Текущая модель: {model}",
         'safety_error': """⚠️ Я не могу обработать этот запрос из-за правил безопасности.
 Пожалуйста, перефразируйте сообщение."""
@@ -111,6 +123,8 @@ Please rephrase your message to be more appropriate."""
 • Gemini ✨ - Найновіший ІІ від Google
 • GPT-4O 🔮 - Оптимізований GPT-4
 • GPT-4O-mini 🎯 - Швидка версія
+• Claude 3.5 Sonnet 🎭 - Найновіша модель від Anthropic
+• Claude 3.5 Haiku 🎋 - Швидка та ефективна
 
 Можливості:
 • Підтримка різних мов 🌐
@@ -136,9 +150,11 @@ Please rephrase your message to be more appropriate."""
 • Google Gemini
 • GPT-4O
 • GPT-4O-mini
+• Claude 3.5 Sonnet
+• Claude 3.5 Haiku
 
 Версія: 2.0
-Розробник: @tr3ble""",
+Розробник: @your_username""",
         'new_topic': '🆕 Починаємо нову тему!',
         'image_prompt': '🎨 Будь ласка, опишіть зображення, яке хочете створити:',
         'image_error': '❌ Сталася помилка при створенні зображення:',
@@ -150,6 +166,8 @@ Please rephrase your message to be more appropriate."""
         'model_switched_gemini': "✨ Переключено на модель Gemini",
         'model_switched_gpt4o': "🔮 Переключено на модель GPT-4O",
         'model_switched_gpt4o_mini': "🎯 Переключено на модель GPT-4O-mini",
+        'model_switched_claude': "🎭 Переключено на модель Claude 3.5 Sonnet",
+        'model_switched_claude_haiku': "🎋 Переключено на модель Claude 3.5 Haiku",
         'current_model': "Поточна модель: {model}",
         'safety_error': """⚠️ Я не можу обробити цей запит через правила безпеки.
 Будь ласка, перефразуйте повідомлення."""

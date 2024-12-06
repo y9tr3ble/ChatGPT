@@ -9,6 +9,7 @@ class Config:
     bot_token: str
     openai_api_key: str
     gemini_api_key: str
+    anthropic_api_key: str
 
     def __init__(self):
         # Configure logging
@@ -50,6 +51,7 @@ class Config:
         self.bot_token = self._get_and_validate_token('BOT_TOKEN')
         self.openai_api_key = environ.get('OPENAI_API_KEY', '').strip()
         self.gemini_api_key = environ.get('GEMINI_API_KEY', '').strip()
+        self.anthropic_api_key = environ.get('ANTHROPIC_API_KEY', '').strip()
 
     def _get_and_validate_token(self, env_var: str) -> str:
         """Get and validate bot token from environment variables"""

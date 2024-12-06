@@ -21,6 +21,10 @@ def get_model_keyboard() -> InlineKeyboardMarkup:
         [
             InlineKeyboardButton(text="GPT-4O 🔮", callback_data="model_gpt4o"),
             InlineKeyboardButton(text="GPT-4O-mini 🎯", callback_data="model_gpt4o_mini")
+        ],
+        [
+            InlineKeyboardButton(text="Claude 3.5 Sonnet 🎭", callback_data="model_claude"),
+            InlineKeyboardButton(text="Claude 3.5 Haiku 🎋", callback_data="model_claude_haiku")
         ]
     ])
     return keyboard

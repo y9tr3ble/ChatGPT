@@ -5,6 +5,7 @@ from src.services.message_service import MessageService
 from src.services.openai_service import OpenAIService
 from src.services.gemini_service import GeminiService
 from src.services.gpt4o_service import GPT4OService
+from src.services.claude_service import ClaudeService
 from src.services.user_service import UserService
 import logging
 
@@ -17,6 +18,7 @@ async def handle_message(
     openai_service: OpenAIService,
     gemini_service: GeminiService,
     gpt4o_service: GPT4OService,
+    claude_service: ClaudeService,
     user_service: UserService
 ):
     """Handle user messages"""
@@ -63,6 +65,16 @@ async def handle_message(
                 message_service.get_messages(user_id),
                 user_id,
                 is_mini=True
+            )
+        elif model == "claude":
+            response = await claude_service.generate_chat_response(
+                message_service.get_messages(user_id),
+                user_id
+            )
+        elif model == "claude_haiku":
+            response = await claude_service.generate_haiku_response(
+                message_service.get_messages(user_id),
+                user_id
             )
             
         # Add response to history

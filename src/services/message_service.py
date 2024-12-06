@@ -130,9 +130,49 @@ class MessageService:
         else:
             # If it's a direct response, use the text as is
             text = message_key_or_text
+            
+        # Handle code blocks for Telegram formatting
+        if "```" in text:
+            # Split text by code blocks
+            parts = text.split("```")
+            formatted_text = parts[0]  # First part (before any code block)
+            
+            for i in range(1, len(parts), 2):
+                if i < len(parts):
+                    # Extract code and language (if specified)
+                    code_part = parts[i].strip()
+                    if code_part and "\n" in code_part:
+                        first_line = code_part.split("\n")[0]
+                        if first_line.strip() in ["cpp", "c++", "python", "js", "javascript"]:
+                            code = "\n".join(code_part.split("\n")[1:])
+                            lang = first_line.strip()
+                        else:
+                            code = code_part
+                            lang = ""
+                    else:
+                        code = code_part
+                        lang = ""
+                    
+                    # Escape HTML special characters in code
+                    code = code.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+                    
+                    # Format code block with HTML and proper spacing
+                    formatted_text += f"\n<pre><code>{code}</code></pre>\n"
+                    
+                    # Add text between code blocks
+                    if i + 1 < len(parts):
+                        formatted_text += parts[i + 1]
+            
+            text = formatted_text
         
         # Send message
-        await message.answer(text, reply_markup=reply_markup)
+        try:
+            await message.answer(text, reply_markup=reply_markup, parse_mode="HTML")
+        except Exception as e:
+            # If HTML parsing fails, try sending without code formatting
+            logging.error(f"Error sending formatted message: {str(e)}")
+            text = text.replace("<pre><code>", "").replace("</code></pre>", "")
+            await message.answer(text, reply_markup=reply_markup)
 
     def clear_all_messages(self) -> None:
         """Clear all messages for all users"""

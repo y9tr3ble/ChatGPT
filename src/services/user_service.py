@@ -27,7 +27,11 @@ class UserService:
     
     def set_user_model(self, user_id: str, model: str) -> None:
         """Set user's preferred model and save state"""
-        if model not in ["gpt4", "gemini", "gpt4o", "gpt4o_mini"]:
+        allowed_models = [
+            "gpt4", "gemini", "gpt4o", "gpt4o_mini",
+            "claude", "claude_haiku"
+        ]
+        if model not in allowed_models:
             raise ValueError(f"Unsupported model: {model}")
         self.user_models[user_id] = model
         self.save_user_state(user_id)

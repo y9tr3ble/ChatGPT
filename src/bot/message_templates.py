@@ -9,15 +9,20 @@ message_templates: Dict[str, Dict[str, str]] = {
         'about': 'This bot is powered by OpenAI GPT-4.',
         'help': '''Available commands:
 /start - Start bot
-/newtopic - Start new topic
-/image - Generate image
-/about - About bot
 /help - Show this help
-/language - Change language''',
+/about - About bot
+/language - Change language
+/model - Show current AI model
+/use_openai - Switch to OpenAI
+/use_gemini - Switch to Gemini
+''',
         'language_confirmation': "Language has been set to English.",
         'language_selection': "Choose your language:",
         'processing': "Processing your request...",
-        'error': "An error occurred. Please try again later."
+        'error': "An error occurred. Please try again later.",
+        'model_switched_gemini': "Switched to Gemini model ✨",
+        'model_switched_openai': "Switched to OpenAI model 🤖",
+        'current_model': "Current model: {}",
     },
     'ru': {
         'start': "Привет, я бот на основе API GPT-4(ChatGPT). Введите /help",
@@ -27,15 +32,20 @@ message_templates: Dict[str, Dict[str, str]] = {
         'about': 'Этот бот работает на основе OpenAI GPT-4.',
         'help': '''Доступные команды:
 /start - Запустить бота
-/newtopic - Начать новую тему
-/image - Сгенерировать изображение
+/help - Показать справку
 /about - О боте
-/help - Показать эту справку
-/language - Изменить язык''',
+/language - Изменить язык
+/model - Показать текущую модель
+/use_openai - Переключиться на OpenAI
+/use_gemini - Переключиться на Gemini
+''',
         'language_confirmation': "Язык установлен на русский.",
         'language_selection': "Выберите язык:",
         'processing': "Обрабатываю ваш запрос...",
-        'error': "Произошла ошибка. Пожалуйста, попробуйте позже."
+        'error': "Произошла ошибка. Пожалуйста, попробуйте позже.",
+        'model_switched_gemini': "Переключено на модель Gemini ✨",
+        'model_switched_openai': "Переключено на модель OpenAI 🤖",
+        'current_model': "Текущая модель: {}",
     },
     'ua': {
         'start': "Привіт, я бот на основі API GPT-4(ChatGPT). Введіть /help",
@@ -45,15 +55,20 @@ message_templates: Dict[str, Dict[str, str]] = {
         'about': 'Цей бот працює на основі OpenAI GPT-4.',
         'help': '''Доступні команди:
 /start - Запустити бота
-/newtopic - Почати нову тему
-/image - Згенерувати зображення
+/help - Показати довідку
 /about - Про бота
-/help - Показати цю довідку
-/language - Змінити мову''',
+/language - Змінити мову
+/model - Показати поточну модель
+/use_openai - Перемкнутися на OpenAI
+/use_gemini - Перемкнутися на Gemini
+''',
         'language_confirmation': "Мову встановлено на українську.",
         'language_selection': "Оберіть мову:",
         'processing': "Обробляю ваш запит...",
-        'error': "Сталася помилка. Будь ласка, спробуйте пізніше."
+        'error': "Сталася помилка. Будь ласка, спробуйте пізніше.",
+        'model_switched_gemini': "Переключено на модель Gemini ✨",
+        'model_switched_openai': "Переключено на модель OpenAI 🤖",
+        'current_model': "Поточна модель: {}",
     }
 }
 

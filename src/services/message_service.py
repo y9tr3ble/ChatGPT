@@ -1,6 +1,6 @@
 from typing import Dict, Optional, List
 from aiogram import types
-from message_templates import message_templates
+from src.bot.message_templates import message_templates
 
 class MessageService:
     def __init__(self):
@@ -40,8 +40,13 @@ class MessageService:
         """Get all messages for user"""
         return self.messages.get(user_id, [])
 
-    async def send_message(self, user_id: int, message_key: str, message: types.Message) -> None:
-        """Send message to user using template"""
+    async def send_message(self, user_id: int, message_key: str, message: types.Message, **kwargs) -> None:
+        """Send message to user using template with optional formatting"""
         language = self.get_user_language(user_id)
         text = self.get_message(message_key, language)
+        
+        # Format message if kwargs provided
+        if kwargs:
+            text = text.format(**kwargs)
+        
         await message.reply(text) 

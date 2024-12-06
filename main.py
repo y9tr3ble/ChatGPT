@@ -17,6 +17,8 @@ from src.config import Config
 from src.bot.handlers import common, language, chat
 from src.services.message_service import MessageService
 from src.services.openai_service import OpenAIService
+from src.services.gemini_service import GeminiService
+from src.services.user_service import UserService
 from src.bot.middlewares.language import LanguageMiddleware
 
 async def main():
@@ -40,6 +42,8 @@ async def main():
         # Initialize services
         message_service = MessageService()
         openai_service = OpenAIService(config.openai_api_key)
+        gemini_service = GeminiService(config.gemini_api_key)
+        user_service = UserService()
         
         # Initialize dispatcher
         dp = Dispatcher(storage=MemoryStorage())
@@ -55,6 +59,8 @@ async def main():
         # Set up services for handlers
         dp["message_service"] = message_service
         dp["openai_service"] = openai_service
+        dp["gemini_service"] = gemini_service
+        dp["user_service"] = user_service
         
         # Start polling
         await dp.start_polling(bot)

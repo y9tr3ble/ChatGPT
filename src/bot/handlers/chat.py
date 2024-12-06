@@ -2,6 +2,8 @@ from aiogram import Router, F
 from aiogram.types import Message
 from src.services.message_service import MessageService
 from src.services.openai_service import OpenAIService
+from src.services.gemini_service import GeminiService
+from src.services.user_service import UserService
 import logging
 from typing import Any
 
@@ -12,6 +14,8 @@ async def handle_message(
     message: Message,
     message_service: MessageService,
     openai_service: OpenAIService,
+    gemini_service: GeminiService,
+    user_service: UserService,
     **data: Any
 ) -> None:
     try:
@@ -30,9 +34,15 @@ async def handle_message(
         )
         
         try:
-            # Generate response
+            # Get messages history
             messages = message_service.get_messages(user_id)
-            response = await openai_service.generate_chat_response(messages, user_id)
+            
+            # Choose service based on user preference
+            current_model = user_service.get_user_model(user_id)
+            service = gemini_service if current_model == "gemini" else openai_service
+            
+            # Generate response
+            response = await service.generate_chat_response(messages, user_id)
             
             # Add response to history
             message_service.add_message(user_id, "assistant", response)
@@ -41,12 +51,11 @@ async def handle_message(
             await message.answer(response)
             
         except Exception as e:
-            logging.error(f"OpenAI error: {str(e)}")
+            logging.error(f"{current_model.upper()} API error: {str(e)}")
             await message.answer(
                 message_service.get_message("error", message_service.get_user_language(message.from_user.id))
             )
         finally:
-            # Always try to delete processing message
             try:
                 await processing_msg.delete()
             except Exception as e:

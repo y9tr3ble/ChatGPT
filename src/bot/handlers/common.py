@@ -43,6 +43,24 @@ async def about_cmd(message: Message, message_service: MessageService):
         message
     )
 
+@router.message(Command("stats"))
+async def stats_cmd(message: Message, message_service: MessageService, user_service: UserService):
+    """Show chat statistics"""
+    user_id = str(message.from_user.id)
+    stats = message_service.get_message_stats(user_id)
+    model = user_service.get_user_model(user_id)
+    
+    await message_service.send_message(
+        message.from_user.id,
+        "stats",
+        message,
+        messages=stats["message_count"],
+        tokens=stats["estimated_tokens"],
+        max_messages=stats["max_messages"],
+        max_tokens=stats["max_tokens"],
+        model=model.upper()
+    )
+
 @router.message(Command("model"))
 @router.message(F.text.contains("🔄"))
 async def model_cmd(message: Message, message_service: MessageService, user_service: UserService):

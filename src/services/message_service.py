@@ -4,13 +4,18 @@ from aiogram.types import InlineKeyboardMarkup, ReplyKeyboardMarkup
 from src.bot.message_templates import message_templates
 from src.services.storage_service import StorageService
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 class MessageService:
-    def __init__(self, storage: StorageService):
+    def __init__(self, storage: StorageService, max_messages: int = 20, max_tokens: int = 4000):
         self.message_templates = message_templates
         self.user_languages: Dict[int, str] = {}
         self.messages: Dict[str, List[Dict[str, str]]] = {}
         self.storage = storage
+        self.max_messages = max_messages
+        self.max_tokens = max_tokens
         
     def load_user_state(self, user_id: str) -> None:
         """Load user state from storage"""
@@ -57,12 +62,52 @@ class MessageService:
         """Add message to user's history and save state"""
         if user_id not in self.messages:
             self.messages[user_id] = []
-        self.messages[user_id].append({"role": role, "content": content})
+            
+        # Add new message
+        message = {"role": role, "content": content}
+        self.messages[user_id].append(message)
+        
+        # Check message count limit
+        if len(self.messages[user_id]) > self.max_messages:
+            # Remove oldest messages but keep the system message if it exists
+            if self.messages[user_id][0]["role"] == "system":
+                self.messages[user_id] = [self.messages[user_id][0]] + self.messages[user_id][-self.max_messages+1:]
+            else:
+                self.messages[user_id] = self.messages[user_id][-self.max_messages:]
+        
+        # Estimate token count (rough estimation)
+        total_tokens = sum(len(msg["content"].split()) * 1.3 for msg in self.messages[user_id])
+        
+        # If exceeding token limit, remove oldest messages
+        while total_tokens > self.max_tokens and len(self.messages[user_id]) > 1:
+            # Keep system message if it exists
+            if self.messages[user_id][0]["role"] == "system" and len(self.messages[user_id]) > 2:
+                removed_msg = self.messages[user_id][1]
+                self.messages[user_id].pop(1)
+            else:
+                removed_msg = self.messages[user_id][0]
+                self.messages[user_id].pop(0)
+            total_tokens -= len(removed_msg["content"].split()) * 1.3
+            
         self.save_user_state(user_id)
+        
+        # Log message stats
+        logger.info(f"User {user_id} messages: {len(self.messages[user_id])}, estimated tokens: {int(total_tokens)}")
 
     def get_messages(self, user_id: str) -> List[Dict[str, str]]:
         """Get all messages for user"""
         return self.messages.get(user_id, [])
+        
+    def get_message_stats(self, user_id: str) -> Dict[str, int]:
+        """Get message statistics for user"""
+        messages = self.messages.get(user_id, [])
+        total_tokens = sum(len(msg["content"].split()) * 1.3 for msg in messages)
+        return {
+            "message_count": len(messages),
+            "estimated_tokens": int(total_tokens),
+            "max_messages": self.max_messages,
+            "max_tokens": self.max_tokens
+        }
 
     async def send_message(
         self, 

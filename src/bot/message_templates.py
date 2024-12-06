@@ -27,6 +27,7 @@ Use the buttons below to interact with me!""",
 /model - Change AI model
 /newtopic - Start new topic
 /image - Generate image
+/stats - Show chat statistics
 
 You can also use the buttons below for quick access.""",
         'about': """🤖 <b>AI Assistant Bot</b>
@@ -41,6 +42,13 @@ This bot combines multiple powerful AI models:
 
 Version: 2.0
 Developer: @your_username""",
+        'stats': """📊 <b>Chat Statistics</b>
+
+Current model: {model}
+Messages in history: {messages}/{max_messages}
+Estimated tokens: {tokens}/{max_tokens}
+
+Use /newtopic to clear history""",
         'new_topic': '🆕 Starting a new topic!',
         'image_prompt': '🎨 Please describe the image you want to generate:',
         'image_error': '❌ An error occurred during image generation:',
@@ -84,6 +92,7 @@ Please rephrase your message to be more appropriate."""
 /model - Сменить модель ИИ
 /newtopic - Начать новую тему
 /image - Создать изображение
+/stats - Показать статистику чата
 
 Также можно использовать кнопки ниже для быстрого доступа.""",
         'about': """🤖 <b>ИИ-Ассистент Бот</b>
@@ -98,6 +107,13 @@ Please rephrase your message to be more appropriate."""
 
 Версия: 2.0
 Разработчик: @your_username""",
+        'stats': """📊 <b>Статистика чата</b>
+
+Текущая модель: {model}
+Сообщений в истории: {messages}/{max_messages}
+Примерное количество токенов: {tokens}/{max_tokens}
+
+Используйте /newtopic для очистки истории""",
         'new_topic': '🆕 Начинаем новую тему!',
         'image_prompt': '🎨 Пожалуйста, опишите изображение, которое хотите создать:',
         'image_error': '❌ Произошла ошибка при создании изображения:',
@@ -141,6 +157,7 @@ Please rephrase your message to be more appropriate."""
 /model - Змінити модель ІІ
 /newtopic - Почати нову тему
 /image - Створити зображення
+/stats - Показати статистику чату
 
 Також можна використовувати кнопки нижче для швидкого доступу.""",
         'about': """🤖 <b>ІІ-Асистент Бот</b>
@@ -155,6 +172,13 @@ Please rephrase your message to be more appropriate."""
 
 Версія: 2.0
 Розробник: @your_username""",
+        'stats': """📊 <b>Статистика чату</b>
+
+Поточна модель: {model}
+Повідомлень в історії: {messages}/{max_messages}
+Приблизна кількість токенів: {tokens}/{max_tokens}
+
+Використовуйте /newtopic для очищення історії""",
         'new_topic': '🆕 Починаємо нову тему!',
         'image_prompt': '🎨 Будь ласка, опишіть зображення, яке хочете створити:',
         'image_error': '❌ Сталася помилка при створенні зображення:',

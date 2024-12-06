@@ -67,30 +67,37 @@ class MessageService:
     async def send_message(
         self, 
         user_id: int, 
-        message_key: str, 
+        message_key_or_text: str, 
         message: types.Message, 
         reply_markup: Union[InlineKeyboardMarkup, ReplyKeyboardMarkup, None] = None,
+        is_response: bool = False,
         **kwargs
     ) -> None:
         """Send message to user using template with optional formatting and keyboard"""
-        language = self.get_user_language(user_id)
-        text = self.get_message(message_key, language)
+        # If it's a template key, get the template
+        if not is_response:
+            language = self.get_user_language(user_id)
+            text = self.get_message(message_key_or_text, language)
+            
+            # Format message if kwargs provided
+            if kwargs:
+                text = text.format(**kwargs)
+        else:
+            # If it's a direct response, use the text as is
+            text = message_key_or_text
         
-        # Format message if kwargs provided
-        if kwargs:
-            text = text.format(**kwargs)
-        
-        await message.reply(text, reply_markup=reply_markup) 
+        # Send message
+        await message.answer(text, reply_markup=reply_markup)
 
     def clear_all_messages(self) -> None:
         """Clear all messages for all users"""
         self.messages = {}
-        # Очищаем сообщения в хранилище для всех пользователей
+        # Clear messages in storage for all users
         storage_dir = self.storage.storage_dir
         if os.path.exists(storage_dir):
             for filename in os.listdir(storage_dir):
                 if filename.startswith("user_") and filename.endswith(".json"):
-                    user_id = filename[5:-5]  # Извлекаем ID пользователя из имени файла
+                    user_id = filename[5:-5]  # Extract user ID from filename
                     data = self.storage.load_user_data(user_id)
                     if data:
                         data['messages'] = []

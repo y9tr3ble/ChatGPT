@@ -6,18 +6,9 @@ from src.services.openai_service import OpenAIService
 from src.services.gemini_service import GeminiService
 from src.services.gpt4o_service import GPT4OService
 from src.services.user_service import UserService
-from src.bot.keyboards import get_main_keyboard
 import logging
-import asyncio
-from typing import Any
 
-router = Router()
-
-async def send_typing_action(message: Message):
-    """Send typing action every 4 seconds"""
-    while True:
-        await message.answer_chat_action(action=ChatAction.TYPING)
-        await asyncio.sleep(4)
+router = Router(name='chat')
 
 @router.message(F.text)
 async def handle_message(
@@ -26,88 +17,83 @@ async def handle_message(
     openai_service: OpenAIService,
     gemini_service: GeminiService,
     gpt4o_service: GPT4OService,
-    user_service: UserService,
-    **data: Any
-) -> None:
+    user_service: UserService
+):
+    """Handle user messages"""
     try:
         user_id = str(message.from_user.id)
         
-        # Load user state from storage
+        # Skip processing commands
+        if message.text.startswith('/'):
+            return
+            
+        # Load user state
         message_service.load_user_state(user_id)
         
-        # Игнорируем команды кнопок
-        if message.text.startswith(('❓', '🔄', '🌐', 'ℹ️')):
-            return
-        
-        # Add message to history
+        # Add user message to history
         message_service.add_message(user_id, "user", message.text)
         
-        # Get processing message
-        processing_msg = await message.answer(
-            message_service.get_message("processing", message_service.get_user_language(message.from_user.id))
+        # Show typing status
+        await message.bot.send_chat_action(
+            chat_id=message.chat.id,
+            action=ChatAction.TYPING
         )
         
-        try:
-            # Start typing action task
-            typing_task = asyncio.create_task(send_typing_action(message))
-            
-            # Get messages history
-            messages = message_service.get_messages(user_id)
-            
-            # Choose service based on user preference
-            current_model = user_service.get_user_model(user_id)
-            if current_model == "gemini":
-                response = await gemini_service.generate_chat_response(messages, user_id)
-            elif current_model == "gpt4":
-                response = await openai_service.generate_chat_response(messages, user_id)
-            elif current_model == "gpt4o":
-                response = await gpt4o_service.generate_chat_response(messages, user_id, is_mini=False)
-            else:  # gpt4o_mini
-                response = await gpt4o_service.generate_chat_response(messages, user_id, is_mini=True)
-            
-            # Stop typing action
-            typing_task.cancel()
-            
-            # Add response to history
-            message_service.add_message(user_id, "assistant", response)
-            
-            # Send response with keyboard
-            lang = message_service.get_user_language(message.from_user.id)
-            keyboard = get_main_keyboard(lang)
-            await message.answer(response, reply_markup=keyboard)
-            
-        except ValueError as ve:
-            if str(ve) == "safety_error":
-                # Отправляем сообщение о нарушении правил безопасности
-                await message_service.send_message(
-                    message.from_user.id,
-                    "safety_error",
-                    message,
-                    reply_markup=get_main_keyboard(message_service.get_user_language(message.from_user.id))
-                )
-            else:
-                raise
-            
-        except Exception as e:
-            if not isinstance(e, ValueError) or str(e) != "safety_error":
-                logging.error(f"{current_model.upper()} API error: {str(e)}")
-                await message.answer(
-                    message_service.get_message("error", message_service.get_user_language(message.from_user.id))
-                )
-        finally:
-            # Stop typing action if it's still running
-            if 'typing_task' in locals() and not typing_task.done():
-                typing_task.cancel()
-            try:
-                await processing_msg.delete()
-            except Exception as e:
-                logging.error(f"Error deleting processing message: {str(e)}")
+        # Get current model and generate response
+        model = user_service.get_user_model(user_id)
+        response = ""
         
-    except Exception as e:
-        logging.error(f"Error in handle_message: {str(e)}")
-        try:
-            await message.answer(
-                message_service.get_message("error", message_service.get_user_language(message.from_user.id))
+        if model == "gpt4":
+            response = await openai_service.generate_chat_response(
+                message_service.get_messages(user_id),
+                user_id
             )
-        except Exception as send_error:
-            logging.error(f"Error sending error message: {str(send_error)}") 
+        elif model == "gemini":
+            response = await gemini_service.generate_chat_response(
+                message_service.get_messages(user_id),
+                user_id
+            )
+        elif model == "gpt4o":
+            response = await gpt4o_service.generate_chat_response(
+                message_service.get_messages(user_id),
+                user_id
+            )
+        elif model == "gpt4o_mini":
+            response = await gpt4o_service.generate_chat_response(
+                message_service.get_messages(user_id),
+                user_id,
+                is_mini=True
+            )
+            
+        # Add response to history
+        message_service.add_message(user_id, "assistant", response)
+        
+        # Send response
+        await message_service.send_message(
+            message.from_user.id,
+            response,
+            message,
+            is_response=True
+        )
+        
+    except ValueError as e:
+        if "safety_error" in str(e):
+            await message_service.send_message(
+                message.from_user.id,
+                "safety_error",
+                message
+            )
+        else:
+            logging.error(f"Error processing message: {str(e)}")
+            await message_service.send_message(
+                message.from_user.id,
+                "error",
+                message
+            )
+    except Exception as e:
+        logging.error(f"Error processing message: {str(e)}")
+        await message_service.send_message(
+            message.from_user.id,
+            "error",
+            message
+        ) 

@@ -2,11 +2,18 @@ from typing import Dict, Any
 
 message_templates: Dict[str, Dict[str, str]] = {
     'en': {
-        'start': """ Hello! I'm a smart assistant powered by AI.
+        'start': """👋 Hello! I'm a smart AI assistant.
 
-I can help you with various tasks using two powerful AI models:
-• OpenAI GPT-4 🤖
-• Google Gemini ✨
+I can help you with various tasks using powerful AI models:
+• GPT-4 🤖 - Advanced language model
+• Gemini ✨ - Google's latest AI
+• GPT-4O 🔮 - Optimized GPT-4
+• GPT-4O-mini 🎯 - Faster version
+
+Features:
+• Multi-language support 🌐
+• Image generation 🎨
+• Smart conversations 💭
 
 Use the buttons below to interact with me!""",
         'help': """🔍 <b>Available Commands:</b>
@@ -15,100 +22,137 @@ Use the buttons below to interact with me!""",
 /help - Show this help
 /about - About bot
 /language - Change language
-/model - Show current AI model
+/model - Change AI model
+/newtopic - Start new topic
+/image - Generate image
 
-You can also use the buttons below for quick access to commands.""",
+You can also use the buttons below for quick access.""",
         'about': """🤖 <b>AI Assistant Bot</b>
 
-This bot combines the power of two leading AI models:
+This bot combines multiple powerful AI models:
 • OpenAI GPT-4
 • Google Gemini
+• GPT-4O
+• GPT-4O-mini
 
-Version: 1.0
-Developer: @your_username""",
-        'new_topic': 'Starting a new topic!',
-        'image_prompt': 'Please add a description of the image after the /image command.',
-        'image_error': 'An error occurred during image generation:',
-        'language_confirmation': "Language has been set to English.",
-        'language_selection': "Choose your language:",
-        'processing': "Processing your request...",
-        'error': "An error occurred. Please try again later.",
-        'model_switched_gemini': "Switched to Gemini model ✨",
-        'model_switched_gpt4': "Switched to GPT-4 model 🤖",
-        'model_switched_gpt4o': "Switched to GPT-4O model 🔮",
-        'model_switched_gpt4o_mini': "Switched to GPT-4O-mini model 🎯",
+Version: 2.0
+Developer: @tr3ble""",
+        'new_topic': '🆕 Starting a new topic!',
+        'image_prompt': '🎨 Please describe the image you want to generate:',
+        'image_error': '❌ An error occurred during image generation:',
+        'language_confirmation': "🌐 Language has been set to English",
+        'language_selection': "🌍 Choose your language:",
+        'processing': "⏳ Processing your request...",
+        'error': "❌ An error occurred. Please try again later.",
+        'model_switched_gpt4': "🤖 Switched to GPT-4 model",
+        'model_switched_gemini': "✨ Switched to Gemini model",
+        'model_switched_gpt4o': "🔮 Switched to GPT-4O model",
+        'model_switched_gpt4o_mini': "🎯 Switched to GPT-4O-mini model",
         'current_model': "Current model: {model}",
         'safety_error': """⚠️ I cannot process this request due to content safety guidelines.
-Please rephrase your message to be more appropriate and try again.
-
-Guidelines:
-• Avoid sensitive topics
-• Keep the conversation respectful
-• No explicit content""",
+Please rephrase your message to be more appropriate."""
     },
     'ru': {
-        'start': "Привет, я бот на основе API GPT-4(ChatGPT). Введите /help",
-        'new_topic': 'Начинаем новую тему!',
-        'image_prompt': 'Пожалуйста, добавьте описание изображения после команды /image.',
-        'image_error': 'Произошла ошибка при генерации изображения:',
-        'about': 'Этот бот работает на основе OpenAI GPT-4.',
-        'help': '''Доступные команды:
-/start - Запустить бота
-/help - Показать справку
-/about - О боте
-/language - Изменить язык
-/model - Показать текущую модель
-/use_openai - Переключиться на OpenAI
-/use_gemini - Переключиться на Gemini
-''',
-        'language_confirmation': "Язык установлен на русский.",
-        'language_selection': "Выберите язык:",
-        'processing': "Обрабатываю ваш запрос...",
-        'error': "Произошла ошибка. Пожалуйста, попробуйте позже.",
-        'model_switched_gemini': "Переключено на модель Gemini ✨",
-        'model_switched_gpt4': "Переключено на модель GPT-4 🤖",
-        'model_switched_gpt4o': "Переключено на модель GPT-4O 🔮",
-        'model_switched_gpt4o_mini': "Переключено на модель GPT-4O-mini 🎯",
-        'current_model': "Текущая модель: {model}",
-        'safety_error': """⚠️ Я не могу обработать этот запрос из-за правил безопасности контента.
-Пожалуйста, перефразируйте сообщение более корректно и попробуйте снова.
+        'start': """👋 Привет! Я умный ИИ-ассистент.
 
-Рекомендации:
-• Избегайте чувствительных тем
-• Соблюдайте уважительный тон
-• Без неприемлемого контента""",
+Я могу помочь с разными задачами, используя мощные модели ИИ:
+• GPT-4 🤖 - Продвинутая языковая модель
+• Gemini ✨ - Новейший ИИ от Google
+• GPT-4O 🔮 - Оптимизированный GPT-4
+• GPT-4O-mini 🎯 - Быстрая версия
+
+Возможности:
+• Поддержка разных языков 🌐
+• Генерация изображений 🎨
+• Умные диалоги 💭
+
+Используйте кнопки ниже для взаимодействия!""",
+        'help': """🔍 <b>Доступные команды:</b>
+
+/start - Запустить бота
+/help - Показать помощь
+/about - О боте
+/language - Сменить язык
+/model - Сменить модель ИИ
+/newtopic - Начать новую тему
+/image - Создать изображение
+
+Также можно использовать кнопки ниже для быстрого доступа.""",
+        'about': """🤖 <b>ИИ-Ассистент Бот</b>
+
+Этот бот объединяет несколько мощных моделей ИИ:
+• OpenAI GPT-4
+• Google Gemini
+• GPT-4O
+• GPT-4O-mini
+
+Версия: 2.0
+Разработчик: @tr3ble""",
+        'new_topic': '🆕 Начинаем новую тему!',
+        'image_prompt': '🎨 Пожалуйста, опишите изображение, которое хотите создать:',
+        'image_error': '❌ Произошла ошибка при создании изображения:',
+        'language_confirmation': "🌐 Язык изменён на русский",
+        'language_selection': "🌍 Выберите язык:",
+        'processing': "⏳ Обрабатываю ваш запрос...",
+        'error': "❌ Произошла ошибка. Пожалуйста, попробуйте позже.",
+        'model_switched_gpt4': "🤖 Переключено на модель GPT-4",
+        'model_switched_gemini': "✨ Переключено на модель Gemini",
+        'model_switched_gpt4o': "🔮 Переключено на модель GPT-4O",
+        'model_switched_gpt4o_mini': "🎯 Переключено на модель GPT-4O-mini",
+        'current_model': "Текущая модель: {model}",
+        'safety_error': """⚠️ Я не могу обработать этот запрос из-за правил безопасности.
+Пожалуйста, перефразируйте сообщение."""
     },
     'ua': {
-        'start': "Привіт, я бот на основі API GPT-4(ChatGPT). Введіть /help",
-        'new_topic': 'Починаємо нову тему!',
-        'image_prompt': 'Будь ласка, додайте опис зображення після команди /image.',
-        'image_error': 'Виникла помилка під час генерації зображення:',
-        'about': 'Цей бот працює на основі OpenAI GPT-4.',
-        'help': '''Доступні команди:
+        'start': """👋 Привіт! Я розумний ІІ-асистент.
+
+Я можу допомогти з різними завданнями, використовуючи потужні моделі ІІ:
+• GPT-4 🤖 - Просунута мовна модель
+• Gemini ✨ - Найновіший ІІ від Google
+• GPT-4O 🔮 - Оптимізований GPT-4
+• GPT-4O-mini 🎯 - Швидка версія
+
+Можливості:
+• Підтримка різних мов 🌐
+• Генерація зображень 🎨
+• Розумні діалоги 💭
+
+Використовуйте кнопки нижче для взаємодії!""",
+        'help': """🔍 <b>Доступні команди:</b>
+
 /start - Запустити бота
 /help - Показати довідку
 /about - Про бота
 /language - Змінити мову
-/model - Показати поточну модель
-/use_openai - Перемкнутися на OpenAI
-/use_gemini - Перемкнутися на Gemini
-''',
-        'language_confirmation': "Мову встановлено на українську.",
-        'language_selection': "Оберіть мову:",
-        'processing': "Обробляю ваш запит...",
-        'error': "Сталася помилка. Будь ласка, спробуйте пізніше.",
-        'model_switched_gemini': "Переключено на модель Gemini ✨",
-        'model_switched_gpt4': "Переключено на модель GPT-4 🤖",
-        'model_switched_gpt4o': "Переключено на модель GPT-4O 🔮",
-        'model_switched_gpt4o_mini': "Переключено на модель GPT-4O-mini 🎯",
-        'current_model': "Поточна модель: {model}",
-        'safety_error': """⚠️ Я не можу обробити цей запит через правила безпеки контенту.
-Будь ласка, перефразуйте повідомлення більш коректно та спробуйте знову.
+/model - Змінити модель ІІ
+/newtopic - Почати нову тему
+/image - Створити зображення
 
-Рекомендації:
-• Уникайте чутливих тем
-• Дотримуйтесь шанобливого тону
-• Без неприйнятного контенту""",
+Також можна використовувати кнопки нижче для швидкого доступу.""",
+        'about': """🤖 <b>ІІ-Асистент Бот</b>
+
+Цей бот поєднує кілька потужних моделей ІІ:
+• OpenAI GPT-4
+• Google Gemini
+• GPT-4O
+• GPT-4O-mini
+
+Версія: 2.0
+Розробник: @tr3ble""",
+        'new_topic': '🆕 Починаємо нову тему!',
+        'image_prompt': '🎨 Будь ласка, опишіть зображення, яке хочете створити:',
+        'image_error': '❌ Сталася помилка при створенні зображення:',
+        'language_confirmation': "🌐 Мову змінено на українську",
+        'language_selection': "🌍 Оберіть мову:",
+        'processing': "⏳ Обробляю ваш запит...",
+        'error': "❌ Сталася помилка. Будь ласка, спробуйте пізніше.",
+        'model_switched_gpt4': "🤖 Переключено на модель GPT-4",
+        'model_switched_gemini': "✨ Переключено на модель Gemini",
+        'model_switched_gpt4o': "🔮 Переключено на модель GPT-4O",
+        'model_switched_gpt4o_mini': "🎯 Переключено на модель GPT-4O-mini",
+        'current_model': "Поточна модель: {model}",
+        'safety_error': """⚠️ Я не можу обробити цей запит через правила безпеки.
+Будь ласка, перефразуйте повідомлення."""
     }
 }
 

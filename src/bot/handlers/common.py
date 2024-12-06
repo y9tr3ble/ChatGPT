@@ -3,7 +3,7 @@ from aiogram.types import Message, CallbackQuery
 from aiogram.filters import Command
 from src.services.message_service import MessageService
 from src.services.user_service import UserService
-from src.bot.keyboards import get_main_keyboard, get_model_keyboard, get_language_keyboard
+from src.bot.keyboards import get_main_keyboard, get_model_keyboard
 
 router = Router(name='common')
 
@@ -23,10 +23,28 @@ async def start_cmd(message: Message, message_service: MessageService):
         reply_markup=keyboard
     )
 
+@router.message(Command("help"))
+@router.message(F.text.contains("❓"))
+async def help_cmd(message: Message, message_service: MessageService):
+    """Help command handler"""
+    await message_service.send_message(
+        message.from_user.id,
+        "help",
+        message
+    )
+
+@router.message(Command("about"))
+@router.message(F.text.contains("ℹ️"))
+async def about_cmd(message: Message, message_service: MessageService):
+    """About command handler"""
+    await message_service.send_message(
+        message.from_user.id,
+        "about",
+        message
+    )
+
 @router.message(Command("model"))
-@router.message(F.text.contains("Change Model"))
-@router.message(F.text.contains("Сменить модель"))
-@router.message(F.text.contains("Змінити модель"))
+@router.message(F.text.contains("🔄"))
 async def model_cmd(message: Message, message_service: MessageService, user_service: UserService):
     """Model selection handler"""
     user_id = str(message.from_user.id)
@@ -40,72 +58,48 @@ async def model_cmd(message: Message, message_service: MessageService, user_serv
     )
 
 @router.callback_query(F.data.startswith("model_"))
-async def process_model_callback(callback: CallbackQuery, user_service: UserService, message_service: MessageService):
+async def process_model_callback(callback: CallbackQuery, message_service: MessageService, user_service: UserService):
     """Model selection callback handler"""
     user_id = str(callback.from_user.id)
     model = callback.data.replace("model_", "")
+    
+    # Save user's model choice
     user_service.set_user_model(user_id, model)
     
+    # Send confirmation with main keyboard
+    lang = message_service.get_user_language(callback.from_user.id)
+    keyboard = get_main_keyboard(lang)
+    
+    # Get message key based on model
     msg_key = f"model_switched_{model}"
-    await message_service.send_message(callback.from_user.id, msg_key, callback.message)
+    
+    await message_service.send_message(
+        callback.from_user.id,
+        msg_key,
+        callback.message,
+        reply_markup=keyboard
+    )
+    
     await callback.answer()
 
-@router.message(Command("use_gemini"))
-async def use_gemini(message: Message, message_service: MessageService, user_service: UserService):
-    """Switch to Gemini model"""
+@router.message(Command("newtopic"))
+@router.message(F.text.contains("🆕"))
+async def new_topic_cmd(message: Message, message_service: MessageService):
+    """New topic command handler"""
     user_id = str(message.from_user.id)
-    user_service.set_user_model(user_id, "gemini")
-    await message_service.send_message(message.from_user.id, "model_switched_gemini", message)
-
-@router.message(Command("use_openai"))
-async def use_openai(message: Message, message_service: MessageService, user_service: UserService):
-    """Switch to OpenAI model"""
-    user_id = str(message.from_user.id)
-    user_service.set_user_model(user_id, "openai")
-    await message_service.send_message(message.from_user.id, "model_switched_openai", message)
-
-@router.message(Command("help"))
-async def help_cmd(message: Message, message_service: MessageService):
-    """Show help message"""
-    lang = message_service.get_user_language(message.from_user.id)
-    keyboard = get_main_keyboard(lang)
-    await message_service.send_message(
-        message.from_user.id, 
-        "help", 
-        message,
-        reply_markup=keyboard
-    )
-
-@router.message(Command("about"))
-async def about_cmd(message: Message, message_service: MessageService):
-    """About command handler"""
-    lang = message_service.get_user_language(message.from_user.id)
-    keyboard = get_main_keyboard(lang)
-    await message_service.send_message(
-        message.from_user.id, 
-        "about", 
-        message,
-        reply_markup=keyboard
-    )
-
-@router.message(F.text.startswith('❓'))
-async def help_button(message: Message, message_service: MessageService):
-    """Help button handler"""
-    await help_cmd(message, message_service)
-
-@router.message(F.text.startswith('🌐'))
-async def language_button(message: Message, message_service: MessageService):
-    """Language button handler"""
-    lang = message_service.get_user_language(message.from_user.id)
-    keyboard = get_language_keyboard()
+    message_service.clear_messages(user_id)
     await message_service.send_message(
         message.from_user.id,
-        "language_selection",
-        message,
-        reply_markup=keyboard
+        "new_topic",
+        message
     )
 
-@router.message(F.text.startswith('ℹ️'))
-async def about_button(message: Message, message_service: MessageService):
-    """About button handler"""
-    await about_cmd(message, message_service) 
+@router.message(Command("image"))
+@router.message(F.text.contains("🎨"))
+async def image_cmd(message: Message, message_service: MessageService):
+    """Image generation command handler"""
+    await message_service.send_message(
+        message.from_user.id,
+        "image_prompt",
+        message
+    ) 

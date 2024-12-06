@@ -1,5 +1,6 @@
 from aiogram import Router, F
 from aiogram.types import Message
+from aiogram.enums import ChatAction
 from src.services.message_service import MessageService
 from src.services.openai_service import OpenAIService
 from src.services.gemini_service import GeminiService
@@ -7,9 +8,16 @@ from src.services.gpt4o_service import GPT4OService
 from src.services.user_service import UserService
 from src.bot.keyboards import get_main_keyboard
 import logging
+import asyncio
 from typing import Any
 
 router = Router()
+
+async def send_typing_action(message: Message):
+    """Send typing action every 4 seconds"""
+    while True:
+        await message.answer_chat_action(action=ChatAction.TYPING)
+        await asyncio.sleep(4)
 
 @router.message(F.text)
 async def handle_message(
@@ -40,6 +48,9 @@ async def handle_message(
         )
         
         try:
+            # Start typing action task
+            typing_task = asyncio.create_task(send_typing_action(message))
+            
             # Get messages history
             messages = message_service.get_messages(user_id)
             
@@ -53,6 +64,9 @@ async def handle_message(
                 response = await gpt4o_service.generate_chat_response(messages, user_id, is_mini=False)
             else:  # gpt4o_mini
                 response = await gpt4o_service.generate_chat_response(messages, user_id, is_mini=True)
+            
+            # Stop typing action
+            typing_task.cancel()
             
             # Add response to history
             message_service.add_message(user_id, "assistant", response)
@@ -81,6 +95,9 @@ async def handle_message(
                     message_service.get_message("error", message_service.get_user_language(message.from_user.id))
                 )
         finally:
+            # Stop typing action if it's still running
+            if 'typing_task' in locals() and not typing_task.done():
+                typing_task.cancel()
             try:
                 await processing_msg.delete()
             except Exception as e:

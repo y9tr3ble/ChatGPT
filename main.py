@@ -3,7 +3,7 @@ import logging
 import sys
 from os import path
 
-# Добавляем корневую директорию проекта в sys.path
+# Add project root to sys.path
 project_root = path.dirname(path.abspath(__file__))
 if project_root not in sys.path:
     sys.path.append(project_root)
@@ -11,6 +11,8 @@ if project_root not in sys.path:
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram.client.session.aiohttp import AiohttpSession
+from aiogram.exceptions import TelegramAPIError
 from aiogram.client.default import DefaultBotProperties
 
 from src.config import Config
@@ -23,25 +25,39 @@ from src.services.user_service import UserService
 from src.bot.middlewares.language import LanguageMiddleware
 from src.services.storage_service import StorageService
 
+async def create_bot(token: str) -> Bot:
+    """Create and validate bot instance"""
+    session = AiohttpSession()
+    default = DefaultBotProperties(parse_mode=ParseMode.HTML)
+    bot = Bot(token=token, session=session, default=default)
+    
+    try:
+        # Test bot token by getting bot info
+        bot_info = await bot.get_me()
+        logging.info(f"Successfully initialized bot: {bot_info.full_name}")
+        return bot
+    except TelegramAPIError as e:
+        await session.close()
+        error_msg = f"Failed to initialize bot: {str(e)}"
+        logging.error(error_msg)
+        raise ValueError(error_msg)
+
 async def main():
-    # Настраиваем логирование
+    # Configure logging
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
     )
     
+    bot = None
     try:
-        # Load config and print token (временно для отладки)
+        # Load config
         config = Config()
-        logging.info(f"Token length: {len(config.bot_token)}")
         
-        # Initialize bot and test connection
-        default = DefaultBotProperties(parse_mode=ParseMode.HTML)
-        bot = Bot(token=config.bot_token, default=default)
-        bot_info = await bot.get_me()
-        logging.info(f"Bot connection successful! Bot name: {bot_info.full_name}")
+        # Initialize bot
+        bot = await create_bot(config.bot_token)
         
-        # Initialize storage and services
+        # Initialize services
         storage_service = StorageService()
         message_service = MessageService(storage_service)
         openai_service = OpenAIService(config.openai_api_key)
@@ -72,19 +88,20 @@ async def main():
         dp["user_service"] = user_service
         
         # Start polling
+        logging.info("Starting bot...")
         await dp.start_polling(bot)
         
     except Exception as e:
-        logging.error(f"Startup error: {e}")
+        logging.error(f"Startup error: {str(e)}")
         raise
     finally:
-        if 'bot' in locals():
+        if bot is not None:
             await bot.session.close()
 
 if __name__ == "__main__":
     try:
         asyncio.run(main())
-    except (KeyboardInterrupt, SystemExit):
+    except KeyboardInterrupt:
         logging.info("Bot stopped!")
     except Exception as e:
-        logging.error(f"Fatal error: {e}")
+        logging.error(f"Fatal error: {str(e)}")
